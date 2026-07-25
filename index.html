@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>invitacion.exe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #131736;
+    --bg-deep-2: #1c2147;
+    --paper: #fdf7ec;
+    --paper-dim: #f2e9d8;
+    --ink: #2c2a26;
+    --ink-soft: #6b6459;
+    --code-green: #6fae94;
+    --code-pink: #e2637a;
+    --amber: #e8a33d;
+    --amber-dark: #c47f22;
+    --line: #e4d9c2;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(232,163,61,0.10), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(226,99,122,0.12), transparent 45%),
+      linear-gradient(160deg, var(--bg-deep), var(--bg-deep-2));
+    font-family:'Inter', sans-serif;
+    color: var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 16px;
+    overflow-x:hidden;
+  }
+
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity:0.10;
+    pointer-events:none;
+  }
+
+  .window{
+    position:relative;
+    width:100%;
+    max-width: 560px;
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+    overflow:hidden;
+    animation: rise 0.7s cubic-bezier(.2,.8,.25,1) both;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(24px) scale(0.98); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .titlebar{
+    display:flex; align-items:center; gap:8px;
+    background: #26283a;
+    padding: 10px 14px;
+  }
+  .dot{ width:11px; height:11px; border-radius:50%; }
+  .dot.red{ background:#ec6a5e; }
+  .dot.yellow{ background:#f4bf4f; }
+  .dot.green{ background:#61c454; }
+  .titlebar span{
+    margin-left:8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:#b7b9c9;
+  }
+
+  .content{
+    padding: 30px 32px 34px;
+  }
+
+  .console{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+  }
+  .console .prompt{ color: var(--amber-dark); }
+  .console .key{ color: var(--code-pink); }
+  .console .str{ color: var(--code-green); }
+  .console .comment{ color:#9c9382; font-style:italic; }
+
+  .caret{
+    display:inline-block;
+    width:7px; height:15px;
+    background: var(--ink-soft);
+    vertical-align:middle;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .bio{
+    display:none;
+    opacity:0;
+  }
+  .bio.show{
+    display:block;
+    animation: fadeIn 0.8s ease forwards;
+  }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .bio h1{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size: 40px;
+    color: var(--code-pink);
+    margin: 0 0 4px;
+    line-height:1;
+  }
+  .bio p{
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin: 10px 0;
+  }
+  .bio p em{
+    color: var(--amber-dark);
+    font-style:normal;
+    font-weight:600;
+  }
+
+  .stage{
+    display:none;
+    margin-top: 22px;
+  }
+  .stage.show{ display:block; }
+
+  .question{
+    font-family:'Caveat', cursive;
+    font-size: 30px;
+    font-weight:700;
+    text-align:center;
+    color: var(--ink);
+    margin: 4px 0 20px;
+  }
+
+  .btn-row{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap: 18px;
+    min-height: 64px;
+  }
+
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size: 15px;
+    border:none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+
+  .yes-btn{
+    background: var(--amber);
+    color: #2c2a26;
+    box-shadow: 0 8px 18px -8px rgba(232,163,61,0.7);
+  }
+  .yes-btn:hover{ transform: translateY(-2px); box-shadow: 0 12px 22px -8px rgba(232,163,61,0.85); }
+
+  .no-btn{
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--line);
+    transition: left .18s ease, top .18s ease, transform .12s ease;
+  }
+
+  .decline-link{
+    display:block;
+    text-align:center;
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    cursor:pointer;
+    opacity: 0.75;
+  }
+  .decline-link:hover{ opacity:1; }
+
+  .schedule{
+    text-align:center;
+  }
+  .schedule p{
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+  .schedule input[type="date"], .schedule input[type="time"]{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: var(--paper-dim);
+    color: var(--ink);
+    margin: 6px 6px;
+  }
+  .schedule input:focus, button:focus-visible{
+    outline: 3px solid rgba(232,163,61,0.55);
+    outline-offset: 2px;
+  }
+
+  .send-btn{
+    display:block;
+    margin: 20px auto 0;
+    background: var(--code-green);
+    color: #10231b;
+  }
+  .send-btn:hover{ transform: translateY(-2px); }
+  .send-btn:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    transform:none;
+  }
+
+  .confirm{
+    text-align:center;
+  }
+  .confirm h2{
+    font-family:'Caveat', cursive;
+    font-size: 34px;
+    color: var(--code-green);
+    margin: 0 0 8px;
+  }
+  .confirm .picked-date{
+    font-family:'JetBrains Mono', monospace;
+    background: var(--paper-dim);
+    display:inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .confirm p.note{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <span>invitacion.exe — ejecutando…</span>
+  </div>
+
+  <div class="content">
+
+    <div class="console" id="console"></div>
+
+    <div class="bio" id="bio">
+      <h1>Hola 👋, espero te encuentres bien</h1>
+    
+      <p>
+        Antes de preguntarte algo... Quiero contarte un poquito sobre mí. Ya estoy estudioando ingeniería en Inteligencia Artificial, no me acuerdo si te conte, soy alguien que disfruta mucho hacer reír a las personas, me encanta aprender cosas nuevas, editar videos, programación, correr, gym, crear proyectos y siempre intento mejorar en todo lo que hago.
+        En el poco tiempo que nos conocimos me gustaste, pero la verdad soy muy tímido. Y aunque ya intente hablar contigo por redes, creo que a ti no te gusta y esta bien, tal vez te gusta algo más real, así que...
+
+       
+
+      <div class="stage" id="stage-question">
+        <p class="question">¿Te gustaría salir conmigo algún día?</p>
+        <div class="btn-row" id="btnRow">
+          <button class="yes-btn" id="yesBtn">Sí, acepto 🙂</button>
+          <button class="no-btn" id="noBtn">No</button>
+        </div>
+        <span class="decline-link" id="declineLink">Prefiero decir que no, gracias</span>
+      </div>
+
+      <div class="stage" id="stage-schedule">
+        <div class="schedule">
+          <p>Perfecto — elige el día (y si quieres, la hora) que mejor te acomode:</p>
+          <input type="date" id="dateInput">
+          <input type="time" id="timeInput">
+          <br>
+          <button class="send-btn" id="sendBtn" disabled>Enviar mi elección</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage-confirm">
+        <div class="confirm">
+          <h2>¡Quedamos así! 🎉</h2>
+          <div class="picked-date" id="pickedDateText"></div>
+          <p>Le acabo de avisar. Nos vemos pronto.</p>
+          <p class="note">(Si el mensaje no se abrió solo, puedes escribirme tú directamente.)</p>
+        </div>
+      </div>
+
+      <div class="stage" id="stage-decline">
+        <div class="confirm">
+          <h2 style="color:var(--ink-soft);">Entendido, gracias por tu tiempo</h2>
+          <p class="note">De verdad, no hay ningún problema. Que tengas un excelente día.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const MI_WHATSAPP = "5215574320660";
+
+  const lines = [
+    { html: '<span class="prompt">&gt;</span> cargando <span class="key">invitacion</span><span class="comment">.js</span> ...' },
+    { html: '<span class="prompt">&gt;</span> const <span class="key">destinatario</span> = <span class="str">"Paulina"</span>;' },
+    { html: '<span class="prompt">&gt;</span> const <span class="key">remitente</span> = <span class="str">"Miguel"</span>;' },
+    { html: '<span class="prompt">&gt;</span> <span class="comment">// compilando presentación...</span>' },
+    { html: '<span class="prompt">&gt;</span> status: <span class="str">listo ✔</span>' },
+  ];
+
+  const consoleEl = document.getElementById('console');
+  let li = 0;
+
+  function typeLines(){
+    if(li < lines.length){
+      const p = document.createElement('div');
+      p.innerHTML = lines[li].html;
+      consoleEl.appendChild(p);
+      li++;
+      setTimeout(typeLines, 420);
+    } else {
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      consoleEl.appendChild(caret);
+      setTimeout(() => {
+        document.getElementById('bio').classList.add('show');
+        document.getElementById('stage-question').classList.add('show');
+      }, 350);
+    }
+  }
+  typeLines();
+
+  const noBtn = document.getElementById('noBtn');
+  const btnRow = document.getElementById('btnRow');
+  let dodges = 0;
+
+  function dodge(){
+    dodges++;
+    const rowRect = btnRow.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+    const maxX = Math.max(rowRect.width - btnRect.width - 4, 10);
+    const maxY = Math.max(rowRect.height - btnRect.height - 4, 10);
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+    noBtn.style.position = 'absolute';
+    noBtn.style.left = 1.1*x + 'px';
+    noBtn.style.top = 1.1*y + 'px';
+
+    const phrases = ["No", "¿Segura?", "Inténtalo de nuevo", "Casi...", "Tan cerca", "Nop", "Otra vez no"];
+    noBtn.textContent = phrases[Math.min(dodges, phrases.length - 1)];
+  }
+
+  noBtn.addEventListener('mouseenter', dodge);
+  noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); dodge(); }, {passive:false});
+  noBtn.addEventListener('click', function(e){ e.preventDefault(); dodge(); });
+
+  // salida real y respetuosa, siempre disponible
+  document.getElementById('declineLink').addEventListener('click', function(){
+    document.getElementById('stage-question').classList.remove('show');
+    document.getElementById('stage-decline').classList.add('show');
+  });
+
+  // ---- Aceptar → agenda ----
+  document.getElementById('yesBtn').addEventListener('click', function(){
+    document.getElementById('stage-question').classList.remove('show');
+    document.getElementById('stage-schedule').classList.add('show');
+  });
+
+  const dateInput = document.getElementById('dateInput');
+  const timeInput = document.getElementById('timeInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  const today = new Date().toISOString().split('T')[0];
+  dateInput.setAttribute('min', today);
+
+  dateInput.addEventListener('change', () => {
+    sendBtn.disabled = !dateInput.value;
+  });
+
+  sendBtn.addEventListener('click', function(){
+    if(!dateInput.value) return;
+
+    const fecha = new Date(dateInput.value + 'T00:00:00');
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    let fechaTexto = fecha.toLocaleDateString('es-MX', opciones);
+    let horaTexto = timeInput.value ? ` a las ${timeInput.value}` : '';
+
+    document.getElementById('pickedDateText').textContent = fechaTexto + horaTexto;
+
+    const mensaje = encodeURIComponent(
+      `¡Hola! Acepté, tu invitación, elegí el ${fechaTexto}${horaTexto}.`
+    );
+    const url = `https://wa.me/${MI_WHATSAPP}?text=${mensaje}`;
+
+    document.getElementById('stage-schedule').classList.remove('show');
+    document.getElementById('stage-confirm').classList.add('show');
+
+    window.open(url, '_blank');
+  });
+</script>
+
+</body>
+</html>
